@@ -30,7 +30,7 @@ spec:
     - --etcd-certfile=/etc/ssl/etcd/ssl/{{CERT_NAME}}.pem
     - --etcd-compaction-interval=5m0s
     - --etcd-keyfile=/etc/ssl/etcd/ssl/{{CERT_NAME}}-key.pem
-    - --etcd-servers=https://172.18.139.128:2379,https://172.18.139.125:2379,https://172.18.139.126:2379
+    - --etcd-servers={{ETCD_SERVERS}}
     - --event-ttl=1h0m0s
     - --kubelet-client-certificate=/etc/kubernetes/ssl/apiserver-kubelet-client.crt
     - --kubelet-client-key=/etc/kubernetes/ssl/apiserver-kubelet-client.key

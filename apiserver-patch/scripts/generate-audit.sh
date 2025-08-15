@@ -8,6 +8,12 @@ if [[ ! -f "$VARIABLES_FILE" ]]; then
     exit 1
 fi
 
+# Generate dynamic etcd servers list from all control plane IPs
+ETCD_SERVERS=$(yq eval '.controlPlanes[].ip' "$VARIABLES_FILE" | sed 's/^/https:\/\//' | sed 's/$/:2379/' | paste -sd, -)
+
+echo "🔧 Generating audit overlays for all control planes..."
+echo "📡 ETCD Servers: $ETCD_SERVERS"
+
 # Read variables and generate manifests for each control plane
 yq eval '.controlPlanes[]' $VARIABLES_FILE | while read -r cp; do
   name=$(echo "$cp" | yq eval '.name' -)
@@ -43,6 +49,9 @@ patches:
       path: /spec/containers/0/command/17
       value: "--etcd-keyfile=/etc/ssl/etcd/ssl/${cert}-key.pem"
     - op: replace
+      path: /spec/containers/0/command/18
+      value: "--etcd-servers=${ETCD_SERVERS}"
+    - op: replace
       path: /spec/containers/0/livenessProbe/httpGet/host
       value: "${ip}"
     - op: replace
@@ -52,5 +61,13 @@ patches:
       path: /spec/containers/0/startupProbe/httpGet/host
       value: "${ip}"
 EOF
-
+  
+  # Generate the final manifest using kustomize
+  echo "🏗️  Building manifest for $name..."
+  kubectl kustomize "../overlays/audit/$name" > "manifests/kube-apiserver-$name.yaml"
+  
+  echo "✅ Generated manifests/kube-apiserver-$name.yaml"
 done
+
+echo "🎉 All audit overlays generated successfully!"
+
