@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   annotations:
-    kubeadm.kubernetes.io/kube-apiserver.advertise-address.endpoint: 172.18.139.128:6443
+    kubeadm.kubernetes.io/kube-apiserver.advertise-address.endpoint: "{{NODE_IP}}:6443"
   creationTimestamp: null
   labels:
     component: kube-apiserver
@@ -13,7 +13,7 @@ spec:
   containers:
   - command:
     - kube-apiserver
-    - --advertise-address=172.18.139.128
+    - --advertise-address={{NODE_IP}}
     - --allow-privileged=true
     - --anonymous-auth=True
     - --apiserver-count=3
@@ -27,9 +27,9 @@ spec:
     - --enable-bootstrap-token-auth=true
     - --endpoint-reconciler-type=lease
     - --etcd-cafile=/etc/ssl/etcd/ssl/ca.pem
-    - --etcd-certfile=/etc/ssl/etcd/ssl/node-cp-1.pem
+    - --etcd-certfile=/etc/ssl/etcd/ssl/{{CERT_NAME}}.pem
     - --etcd-compaction-interval=5m0s
-    - --etcd-keyfile=/etc/ssl/etcd/ssl/node-cp-1-key.pem
+    - --etcd-keyfile=/etc/ssl/etcd/ssl/{{CERT_NAME}}-key.pem
     - --etcd-servers=https://172.18.139.128:2379,https://172.18.139.125:2379,https://172.18.139.126:2379
     - --event-ttl=1h0m0s
     - --kubelet-client-certificate=/etc/kubernetes/ssl/apiserver-kubelet-client.crt
@@ -59,7 +59,7 @@ spec:
     livenessProbe:
       failureThreshold: 8
       httpGet:
-        host: 172.18.139.128
+        host: {{NODE_IP}}
         path: /livez
         port: 6443
         scheme: HTTPS
@@ -70,7 +70,7 @@ spec:
     readinessProbe:
       failureThreshold: 3
       httpGet:
-        host: 172.18.139.128
+        host: {{NODE_IP}}
         path: /readyz
         port: 6443
         scheme: HTTPS
@@ -82,7 +82,7 @@ spec:
     startupProbe:
       failureThreshold: 24
       httpGet:
-        host: 172.18.139.128
+        host: {{NODE_IP}}
         path: /livez
         port: 6443
         scheme: HTTPS
