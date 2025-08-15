@@ -19,13 +19,13 @@ echo "🚀 Deploying kube-apiserver to all control planes..."
 echo "🔄 Deploying to control planes..."
 
 # Deploy to each control plane
-yq eval '.controlPlanes[]' variables.yaml | while read -r cp; do
+yq eval '.controlPlanes[]' $VARIABLES_FILE | while read -r cp; do
   name=$(echo "$cp" | yq eval '.name' -)
   ip=$(echo "$cp" | yq eval '.ip' -)
   user=$(echo "$cp" | yq eval '.user // "root"' -)
   
   echo "  → Deploying to $name ($ip)..."
-  scp "manifests/kube-apiserver-$name.yaml" "$user@$ip:/etc/kubernetes/manifests/kube-apiserver.yaml"
+  scp "../manifests/kube-apiserver-$name.yaml" "$user@$ip:/etc/kubernetes/manifests/kube-apiserver.yaml"
   echo "  ✅ $name deployed"
 done
 

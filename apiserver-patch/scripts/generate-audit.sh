@@ -64,7 +64,7 @@ EOF
   
   # Generate the final manifest using kustomize
   echo "🏗️  Building manifest for $name..."
-  kubectl kustomize "../overlays/audit/$name" > "manifests/kube-apiserver-$name.yaml"
+  kubectl kustomize "../overlays/audit/$name" > "../manifests/kube-apiserver-$name.yaml"
   
   echo "✅ Generated manifests/kube-apiserver-$name.yaml"
 done
