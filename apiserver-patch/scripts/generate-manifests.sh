@@ -1,7 +1,15 @@
 #!/bin/bash
 
+VARIABLES_FILE="../variables.yaml"
+
+# Check if variables.yaml exists
+if [[ ! -f "$VARIABLES_FILE" ]]; then
+    echo "Error: $VARIABLES_FILE not found!"
+    exit 1
+fi
+
 # Read variables and generate manifests for each control plane
-yq eval '.controlPlanes[]' apiserver-patch/variables.yaml | while read -r cp; do
+yq eval '.controlPlanes[]' $VARIABLES_FILE | while read -r cp; do
   name=$(echo "$cp" | yq eval '.name' -)
   ip=$(echo "$cp" | yq eval '.ip' -)
   cert=$(echo "$cp" | yq eval '.cert' -)
@@ -9,10 +17,10 @@ yq eval '.controlPlanes[]' apiserver-patch/variables.yaml | while read -r cp; do
   echo "Generating manifest for $name..."
   
   # Create overlay directory
-  mkdir -p ../overlays/$name
+  mkdir -p ../overlays/audit/$name
   
   # Generate kustomization.yaml with replacements
-  cat > ../overlays/$name/kustomization.yaml << EOF
+  cat > ../overlays/audit/$name/kustomization.yaml << EOF
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -44,7 +52,5 @@ patches:
       path: /spec/containers/0/startupProbe/httpGet/host
       value: "${ip}"
 EOF
-  
-  # Generate the final manifest
-  kustomize build overlays/$name > manifests/kube-apiserver-$name.yaml
+
 done
