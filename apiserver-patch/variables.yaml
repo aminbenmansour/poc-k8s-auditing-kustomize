@@ -1,0 +1,11 @@
+controlPlanes:
+  - name: cp-1
+    ip: 172.18.139.128
+    cert: node-cp-1
+  - name: cp-2
+    ip: 172.18.139.125
+    cert: node-cp-2
+  - name: cp-3
+    ip: 172.18.139.126
+    cert: node-cp-3
+

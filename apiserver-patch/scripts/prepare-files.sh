@@ -12,11 +12,11 @@ CONTROLPLANE_NODE_IP=$2
 echo "== Operating on control-plane: $CONTROLPLANE_NODE_IP =="
 
 echo "Transfer audit policy file"
-kubectl kustomize ../apiserver-patch/overlays/audit/ > kube-apiserver.yaml
+kubectl kustomize ../overlays/audit/ > kube-apiserver.yaml
 
 
 echo "Build kube-apiserver resource for auditing with Kustomize"
-kubectl kustomize ../apiserver-patch/overlays/audit/ > kube-apiserver.yaml
+kubectl kustomize ../overlays/audit/ > kube-apiserver.yaml
 
 echo "Apply kube-apiserver configuration"
 scp kube-apiserver.yaml $CONTROLPLANE_NODE_USER@$CONTROLPLANE_NODE_IP:/etc/kubernetes/manifests/ && rm kube-apiserver.yaml
