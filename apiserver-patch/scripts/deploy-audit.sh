@@ -25,6 +25,7 @@ yq eval '.controlPlanes[]' $VARIABLES_FILE | while read -r cp; do
   user=$(echo "$cp" | yq eval '.user // "root"' -)
   
   echo "  → Deploying to $name ($ip)..."
+  scp "../audit-policy.yaml" "$user@$ip:/etc/kubernetes/audit-policy.yaml"
   scp "../manifests/kube-apiserver-$name.yaml" "$user@$ip:/etc/kubernetes/manifests/kube-apiserver.yaml"
   echo "  ✅ $name deployed"
 done
