@@ -1,17 +1,7 @@
+nameOverride: "filebeat-audit"
 filebeatConfig:
   filebeat.yml: |
     filebeat.inputs:
-    # Collect regular container logs
-    - type: container
-      paths:
-        - /var/log/containers/*.log
-      processors:
-        - add_kubernetes_metadata:
-            host: ${NODE_NAME}
-            matchers:
-            - logs_path:
-                logs_path: "/var/log/containers/"
-
     # Collect Kubernetes audit logs
     - type: log
       paths:
@@ -47,6 +37,10 @@ extraVolumeMounts:
   - name: audit-log
     mountPath: /var/log/kubernetes/audit/
     readOnly: true
+
+# Only run on control plane nodes
+nodeSelector:
+  node-role.kubernetes.io/control-plane: ""
 
 # Ensure Filebeat runs on master nodes to access audit logs
 tolerations:
