@@ -5,17 +5,31 @@ set -e
 NAMESPACE="elk-stack"
 VERSION="8.5.1"
 
-# add and update elastic repo
+echo "Add and Update Elastic repository"
 helm repo add elastic https://helm.elastic.co
 helm repo update
 
-# components installation
-helm install filebeat elastic/filebeat \
+echo "Stack Component Installation"
+helm install filebeat-kubelet elastic/filebeat \
 	--version $VERSION \
 	--namespace $NAMESPACE \
 	--create-namespace \
 	--replace \
-	-f values/filebeat.yaml
+	-f values/filebeat-kubelet-logs.yaml
+
+helm install filebeat-pods elastic/filebeat \
+	--version $VERSION \
+	--namespace $NAMESPACE \
+	--create-namespace \
+	--replace \
+	-f values/filebeat-pod-logs.yaml
+
+helm install filebeat-audit elastic/filebeat \
+	--version $VERSION \
+	--namespace $NAMESPACE \
+	--create-namespace \
+	--replace \
+	-f values/filebeat-audit-logs.yaml
 
 helm install elasticsearch elastic/elasticsearch \
 	--version $VERSION \
@@ -38,3 +52,5 @@ helm install kibana elastic/kibana \
 	--create-namespace \
 	--replace \
 	-f values/kibana.yaml
+
+echo "Finished"
