@@ -1,0 +1,52 @@
+nameOverride: "filebeat-audit"
+filebeatConfig:
+  filebeat.yml: |
+    filebeat.inputs:
+    # Collect Kubernetes audit logs
+    - type: log
+      paths:
+        - /var/log/audit.log
+      fields:
+        logtype: audit
+        component: kube-apiserver
+      fields_under_root: true
+      json.keys_under_root: true
+      json.add_error_key: true
+
+    # Output to Logstash
+    output.logstash:
+      hosts: ["logstash-logstash:5044"]
+
+    # Logging configuration
+    logging.level: info
+    logging.to_files: true
+    logging.files:
+      path: /var/log/filebeat
+      name: filebeat
+      keepfiles: 7
+      permissions: 0644
+
+# Mount audit log path
+extraVolumes:
+  - name: audit-log
+    hostPath:
+      path: /var/log/kubernetes/audit/
+      type: Directory
+
+extraVolumeMounts:
+  - name: audit-log
+    mountPath: /var/log/kubernetes/audit/
+    readOnly: true
+
+# Only run on control plane nodes
+nodeSelector:
+  node-role.kubernetes.io/control-plane: ""
+
+# Ensure Filebeat runs on master nodes to access audit logs
+tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: Exists
+    effect: NoSchedule
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule

@@ -1,0 +1,32 @@
+# Filebeat for pod logs (runs on all nodes)
+nameOverride: "filebeat-pods"
+filebeatConfig:
+  filebeat.yml: |
+    filebeat.inputs:
+    # Collect pod logs
+    - type: container
+      paths:
+        - /var/log/pods/*/*/*.log
+      processors:
+        - add_kubernetes_metadata:
+            host: ${NODE_NAME}
+            matchers:
+            - logs_path:
+                logs_path: "/var/log/pods/"
+      fields:
+        logtype: pod
+      fields_under_root: true
+    
+    output.logstash:
+      hosts: ["logstash-logstash:5044"]
+    
+    logging.level: info
+
+# Ensure Filebeat runs on master nodes to access audit logs
+tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: Exists
+    effect: NoSchedule
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule

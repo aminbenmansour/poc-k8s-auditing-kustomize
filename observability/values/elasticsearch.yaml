@@ -1,0 +1,14 @@
+# Elasticsearch values for local development
+resources:
+  requests:
+    cpu: "100m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "2Gi"
+
+# Disable resource-intensive features for dev
+esJavaOpts: "-Xmx512m -Xms512m"
+
+# Reduce JVM heap for development
+javaOpts: "-Xms512m -Xmx512m"
