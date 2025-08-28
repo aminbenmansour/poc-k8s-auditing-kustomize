@@ -35,9 +35,22 @@ helm install elasticsearch elastic/elasticsearch \
 	--version $VERSION \
 	--namespace $NAMESPACE \
 	--create-namespace \
+	--wait
+	--timeout=15m
 	--replace \
 	-f values/elasticsearch.yaml
-	
+
+echo "Extract Elasticsearch CA Cert"
+kubectl get secret elasticsearch-master-certs \
+	-n $NAMESPACE \
+	-o jsonpath='{.data.tls\.crt}' | base64 -d > http_ca.crt
+
+
+echo "Create a Kubernetes Secret for Logstash"
+kubectl create secret generic es-http-ca \
+	--from-file=http_ca.crt=http_ca.crt \
+	--namespace $NAMESPACE
+
 helm install logstash elastic/logstash \
 	--version $VERSION \
 	--namespace $NAMESPACE \
